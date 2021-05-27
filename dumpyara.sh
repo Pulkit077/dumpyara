@@ -67,6 +67,10 @@ else
     git clone -q https://github.com/marin-m/vmlinux-to-elf "$PROJECT_DIR/vmlinux-to-elf"
 fi
 
+if [[ -f "$PROJECT_DIR/dtc" ]]; then
+    chmod 777 "$PROJECT_DIR/dtc"
+fi
+
 # extract rom via Firmware_extractor
 [[ ! -d "$1" ]] && bash "$PROJECT_DIR"/Firmware_extractor/extractor.sh "$PROJECT_DIR"/input/"${FILE}" "$PROJECT_DIR"/working/"${UNZIP_DIR}"
 
@@ -95,14 +99,14 @@ fi
 mkdir -p "$PROJECT_DIR"/working/"${UNZIP_DIR}"/bootdts
 dtb_list=$(find "$PROJECT_DIR"/working/"${UNZIP_DIR}"/bootimg -name '*.dtb' -type f -printf '%P\n' | sort)
 for dtb_file in $dtb_list; do
-    dtc -I dtb -O dts -o "$(echo "$PROJECT_DIR"/working/"${UNZIP_DIR}"/bootdts/"$dtb_file" | sed -r 's|.dtb|.dts|g')" "$PROJECT_DIR"/working/"${UNZIP_DIR}"/bootimg/"$dtb_file" > /dev/null 2>&1
+    "$PROJECT_DIR/"dtc -I dtb -O dts -o "$(echo "$PROJECT_DIR"/working/"${UNZIP_DIR}"/bootdts/"$dtb_file" | sed -r 's|.dtb|.dts|g')" "$PROJECT_DIR"/working/"${UNZIP_DIR}"/bootimg/"$dtb_file" > /dev/null 2>&1
 done
 
 if [[ -d "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO ]]; then
 mkdir -p "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO/dts
 dtbo_list=$(find "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO -name '*.dtb' -type f -printf '%P\n' | sort)
 for dtbo_file in $dtbo_list; do
-    dtc -I dtb -O dts -o "$(echo "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO/dts/"$dtbo_file" | sed -r 's|.dtb|.dts|g')" "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO/"$dtbo_file" > /dev/null 2>&1
+    "$PROJECT_DIR/"dtc -I dtb -O dts -o "$(echo "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO/dts/"$dtbo_file" | sed -r 's|.dtb|.dts|g')" "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO/"$dtbo_file" > /dev/null 2>&1
 done
 fi
 
