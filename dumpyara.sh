@@ -87,7 +87,7 @@ if [[ -f "$PROJECT_DIR"/working/"${UNZIP_DIR}"/boot.img ]]; then
 fi
 
 if [[ -f "$PROJECT_DIR"/working/"${UNZIP_DIR}"/dtbo.img ]]; then
-    extract-dtb "$PROJECT_DIR"/working/"${UNZIP_DIR}"/dtbo.img -o "$PROJECT_DIR"/working/"${UNZIP_DIR}"/dtbo > /dev/null # Extract dtbo
+    extract-dtb "$PROJECT_DIR"/working/"${UNZIP_DIR}"/dtbo.img -o "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO > /dev/null # Extract dtbo
     echo 'dtbo extracted'
 fi
 
@@ -97,6 +97,14 @@ dtb_list=$(find "$PROJECT_DIR"/working/"${UNZIP_DIR}"/bootimg -name '*.dtb' -typ
 for dtb_file in $dtb_list; do
     dtc -I dtb -O dts -o "$(echo "$PROJECT_DIR"/working/"${UNZIP_DIR}"/bootdts/"$dtb_file" | sed -r 's|.dtb|.dts|g')" "$PROJECT_DIR"/working/"${UNZIP_DIR}"/bootimg/"$dtb_file" > /dev/null 2>&1
 done
+
+if [[ -d "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO ]]; then
+mkdir -p "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO/dts
+dtbo_list=$(find "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO -name '*.dtb' -type f -printf '%P\n' | sort)
+for dtbo_file in $dtbo_list; do
+    dtc -I dtb -O dts -o "$(echo "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO/dts/"$dtbo_file" | sed -r 's|.dtb|.dts|g')" "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO/"$dtbo_file" > /dev/null 2>&1
+done
+fi
 
 # extract PARTITIONS
 cd "$PROJECT_DIR"/working/"${UNZIP_DIR}" || exit
