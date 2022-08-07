@@ -117,12 +117,12 @@ for p in $PARTITIONS; do
                     rm -fv "$p".img > /dev/null 2>&1
                 else
                     echo "Couldn't extract $p partition by fsck.erofs. Using mount loop"
-                    sudo mount -o loop -t auto "$p".img "$p"
+                    mount -o loop -t auto "$p".img "$p"
                     mkdir "${p}_"
-                    sudo cp -rf "${p}/"* "${p}_"
-                    sudo umount "${p}"
-                    sudo cp -rf "${p}_/"* "${p}"
-                    sudo rm -rf "${p}_"
+                    cp -rf "${p}/"* "${p}_"
+                    umount "${p}"
+                    cp -rf "${p}_/"* "${p}"
+                    rm -rf "${p}_"
                     if [ $? -eq 0 ]; then
                         rm -fv "$p".img > /dev/null 2>&1
                     else
@@ -137,8 +137,8 @@ for p in $PARTITIONS; do
 done
 
 # Fix permissions
-sudo chown "$(whoami)" "$PROJECT_DIR"/working/"${UNZIP_DIR}"/./* -fR
-sudo chmod -fR u+rwX "$PROJECT_DIR"/working/"${UNZIP_DIR}"/./*
+chown "$(whoami)" "$PROJECT_DIR"/working/"${UNZIP_DIR}"/./* -fR
+chmod -fR u+rwX "$PROJECT_DIR"/working/"${UNZIP_DIR}"/./*
 
 # board-info.txt
 find "$PROJECT_DIR"/working/"${UNZIP_DIR}"/modem -type f -exec strings {} \; | grep "QC_IMAGE_VERSION_STRING=MPSS." | sed "s|QC_IMAGE_VERSION_STRING=MPSS.||g" | cut -c 4- | sed -e 's/^/require version-baseband=/' >> "$PROJECT_DIR"/working/"${UNZIP_DIR}"/board-info.txt
@@ -199,20 +199,6 @@ top_codename=$(echo "$codename" | tr '[:upper:]' '[:lower:]' | tr -dc '[:print:]
 manufacturer=$(echo "$manufacturer" | tr '[:upper:]' '[:lower:]' | tr -dc '[:print:]' | tr '_' '-' | cut -c 1-35)
 printf "# %s\n- manufacturer: %s\n- platform: %s\n- codename: %s\n- flavor: %s\n- release: %s\n- id: %s\n- incremental: %s\n- tags: %s\n- fingerprint: %s\n- is_ab: %s\n- brand: %s\n- branch: %s\n- repo: %s\n" "$description" "$manufacturer" "$platform" "$codename" "$flavor" "$release" "$id" "$incremental" "$tags" "$fingerprint" "$is_ab" "$brand" "$branch" "$repo" > "$PROJECT_DIR"/working/"${UNZIP_DIR}"/README.md
 cat "$PROJECT_DIR"/working/"${UNZIP_DIR}"/README.md
-
-# create TWRP device tree if possible
-if [[ "$is_ab" = true ]]; then
-    twrpimg="$PROJECT_DIR"/working/"${UNZIP_DIR}"/"boot.img"
-else
-    twrpimg="$PROJECT_DIR"/working/"${UNZIP_DIR}"/"recovery.img"
-fi
-if [[ -f "${twrpimg}" ]]; then
-    twrpdt="$PROJECT_DIR"/working/"${UNZIP_DIR}"/twrp-device-tree
-    python3 -m twrpdtgen "$twrpimg" --output "$twrpdt"
-    if [[ "$?" = 0 ]]; then
-        [[ ! -e "$twrpdt"/README.md ]] && curl https://raw.githubusercontent.com/wiki/SebaUbuntu/TWRP-device-tree-generator/4.-Build-TWRP-from-source.md > "$twrpdt"/README.md
-    fi
-fi
 
 # copy file names
 chown "$(whoami)" ./* -R
