@@ -56,6 +56,11 @@ if [[ -d "$PROJECT_DIR/Firmware_extractor" ]]; then
 else
     git clone -q --recurse-submodules https://github.com/AndroidDumps/Firmware_extractor "$PROJECT_DIR"/Firmware_extractor
 fi
+if [[ -d "$PROJECT_DIR/extract-dtb" ]]; then
+    git -C "$PROJECT_DIR"/extract-dtb pull --recurse-submodules
+else
+    git clone -q https://github.com/PabloCastellano/extract-dtb "$PROJECT_DIR"/extract-dtb
+fi
 if [[ -d "$PROJECT_DIR/mkbootimg_tools" ]]; then
     git -C "$PROJECT_DIR"/mkbootimg_tools pull --recurse-submodules
 else
@@ -76,7 +81,7 @@ fi
 
 # Extract boot.img
 if [[ -f "$PROJECT_DIR"/working/"${UNZIP_DIR}"/boot.img ]]; then
-    extract-dtb "$PROJECT_DIR"/working/"${UNZIP_DIR}"/boot.img -o "$PROJECT_DIR"/working/"${UNZIP_DIR}"/bootimg > /dev/null # Extract boot
+    python3 "$PROJECT_DIR"/extract-dtb/extract_dtb/extract_dtb.py "$PROJECT_DIR"/working/"${UNZIP_DIR}"/boot.img -o "$PROJECT_DIR"/working/"${UNZIP_DIR}"/bootimg > /dev/null # Extract boot
     bash "$PROJECT_DIR"/mkbootimg_tools/mkboot "$PROJECT_DIR"/working/"${UNZIP_DIR}"/boot.img "$PROJECT_DIR"/working/"${UNZIP_DIR}"/boot > /dev/null 2>&1
     echo 'boot extracted'
     # extract-ikconfig
@@ -91,7 +96,7 @@ if [[ -f "$PROJECT_DIR"/working/"${UNZIP_DIR}"/boot.img ]]; then
 fi
 
 if [[ -f "$PROJECT_DIR"/working/"${UNZIP_DIR}"/dtbo.img ]]; then
-    extract-dtb "$PROJECT_DIR"/working/"${UNZIP_DIR}"/dtbo.img -o "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO > /dev/null # Extract dtbo
+    python3 "$PROJECT_DIR"/extract-dtb/extract_dtb/extract_dtb.py "$PROJECT_DIR"/working/"${UNZIP_DIR}"/dtbo.img -o "$PROJECT_DIR"/working/"${UNZIP_DIR}"/DTBO > /dev/null # Extract dtbo
     echo 'dtbo extracted'
 fi
 
